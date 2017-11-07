@@ -5,7 +5,7 @@ use GuzzleHttp;
 
 abstract class Util
 {
-    static function getAPIVersion(Config $config)
+    public static function getAPIVersion(Config $config)
     {
         $now = new \DateTime("now", new \DateTimeZone("UTC"));
 

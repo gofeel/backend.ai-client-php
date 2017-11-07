@@ -6,7 +6,6 @@ use BackendAI;
 
 class ConfigTest extends \PHPUnit_Framework_TestCase
 {
-
     private $initialConfig = [ ];
 
     public function setUp()

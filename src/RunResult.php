@@ -27,7 +27,8 @@ class RunResult
         return $this->dataStr;
     }
 
-    private function parseData() {
+    private function parseData()
+    {
         if (count($this->data) != 0) {
             return;
         }
@@ -62,22 +63,26 @@ class RunResult
         }
     }
 
-    public function isFinished() {
+    public function isFinished()
+    {
         $this->parseData();
         return (!$this->continuation);
     }
 
-    public function getStatus() {
+    public function getStatus()
+    {
         $this->parseData();
         return $this->status;
     }
 
-    public function getStdout() {
+    public function getStdout()
+    {
         $this->parseData();
         return $this->stdout;
     }
 
-    public function getStderr() {
+    public function getStderr()
+    {
         $this->parseData();
         return $this->stderr;
     }

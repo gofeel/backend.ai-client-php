@@ -15,35 +15,27 @@ class Config
 
     public function __construct(array $options=null)
     {
-        if(isset($options['accessKey']))
-        {
+        if (isset($options['accessKey'])) {
             $this->accessKey = $options['accessKey'];
-        }
-        else if (isset($_SERVER['BACKEND_ACCESS_KEY'])) {
+        } elseif (isset($_SERVER['BACKEND_ACCESS_KEY'])) {
             $this->accessKey = $_SERVER['BACKEND_ACCESS_KEY'];
-        } 
-        else
-        {
-            throw new Exceptions\ConfigException("No credentials.");;
+        } else {
+            throw new Exceptions\ConfigException("No credentials.");
+            ;
         }
 
-        if(isset($options['secretKey']))
-        {
+        if (isset($options['secretKey'])) {
             $this->secretKey = $options['secretKey'];
-        }
-        else if (isset($_SERVER['BACKEND_SECRET_KEY'])) {
+        } elseif (isset($_SERVER['BACKEND_SECRET_KEY'])) {
             $this->secretKey = $_SERVER['BACKEND_SECRET_KEY'];
-        }
-        else
-        {
-            throw new Exceptions\ConfigException("No credentials.");;
+        } else {
+            throw new Exceptions\ConfigException("No credentials.");
+            ;
         }
 
-        if(isset($options['endpoint']))
-        {
+        if (isset($options['endpoint'])) {
             $this->endpoint = $options['endpoint'];
-        }
-        else if (isset($_SERVER['BACKEND_ENDPOINT'])) {
+        } elseif (isset($_SERVER['BACKEND_ENDPOINT'])) {
             $this->endpoint = $_SERVER['BACKEND_ENDPOINT'];
         }
     }

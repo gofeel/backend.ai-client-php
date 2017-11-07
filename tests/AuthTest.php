@@ -6,7 +6,6 @@ use BackendAI;
 
 class AuthTest extends \PHPUnit_Framework_TestCase
 {
-
     private $initialConfig = [ ];
 
     public function setUp()
