@@ -10,7 +10,7 @@ class Config
     public $apiVersionMajor = 'v2';
     public $apiVersion = 'v2.20170315';
     public $hash_type = 'sha256';
-    public $endpoint = 'https://api.sorna.io';
+    public $endpoint = 'https://api.backend.ai';
     public $userAgent = 'BackendAI Client Library (Php/v0.1)';
 
     public function __construct(array $options=null)

@@ -28,26 +28,27 @@ function showResult(json) {
     $("#result").html(htmlOutput);
 }
 
-function sendCode(code, kernelId) {
+function sendCode(code, kernelId, runId) {
   var data = {
     "code": code,
     "kernelId": kernelId,
-    "cont": (continuation ? 1:0)
+    "cont": (continuation ? 1:0),
+    "runId": runId
   };
   $.post( "run.php", data, function( json ) {
     var items = [];
-    if (json.code != 200) {
-      setStatus("Error - " + json.code);
-    }
     if (json.result.status) {
         if (json.result.status == "continued") {
             continuation = true;
-            setTimeout(() => sendCode(), 1);
+            setTimeout(() => sendCode(code, kernelId, runId), 1);
         } else if (json.result.status == "waiting-input") {
             continuation = true;
         } else {
             continuation = false;
-            setStatus("Done");
+            $.post( "destroy.php", data, function(j){
+              $("#kernelId").val("");
+              setStatus("Done");
+            }, "json")
         }
     }
     if (json.result.console) {
@@ -67,13 +68,20 @@ function createKernel(code) {
   }).done(
     function( json ) {
     var items = [];
-    if (json.code != 200) {
-      setStatus("Error - " + json.code);
-    }
     if (json.kernelId) {
       $("#kernelId").val(json.kernelId);
     }
   });
+}
+
+function makeRunId() {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for (var i = 0; i < 5; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
 }
 
 $('#btn_run').click(function(e) {
@@ -81,6 +89,7 @@ $('#btn_run').click(function(e) {
   setStatus("KernelCheck");
   var code = "";
   var kernelId = $("#kernelId").val();
+  var runId = makeRunId();
   if(kernelId == "") {
     setStatus("RequestKernel");
     createKernel();
@@ -91,6 +100,6 @@ $('#btn_run').click(function(e) {
     code = editor.getValue();
   }
   setStatus("Running...");
-  sendCode(code, kernelId);
+  sendCode(code, kernelId, runId);
 });
 

@@ -20,12 +20,7 @@ $args = [
 $config = new Config($args);
 
 $kernel = new Kernel("", $kernelId, $config, $kernelId);
+$kernel->destroy();
 
-if($cont) {
-    $result = $kernel->runCode(null, $runId);
-} else {
-    $result = $kernel->runCode($code, $runId);
-}
-
-echo $result->asJsonString();
+echo '{}';
 

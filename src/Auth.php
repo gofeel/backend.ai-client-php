@@ -28,7 +28,7 @@ class Auth
         $res = hash_init($this->hash_type);
         hash_update($res, $bodyValue);
         $hstring = hash_final($res);
-        return "{$method}\n{$queryString}\n" . $dateValue . "\n" . 'host:' . $this->hostname .  "\n".'content-type:application/json' . "\n" . 'x-sorna-version:'.$this->apiVersion . "\n" . $hstring;
+        return "{$method}\n{$queryString}\n" . $dateValue . "\n" . 'host:' . $this->hostname .  "\n".'content-type:application/json' . "\n" . 'x-backendai-version:'.$this->apiVersion . "\n" . $hstring;
     }
 
     public function getSignKey($secret_key, $now)

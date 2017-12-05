@@ -39,7 +39,9 @@ function main() {
         return;
     }
 
+/*
     echo $c("Backend AI API Version: " . Util::getAPIVersion($config))->internal_info . PHP_EOL;
+*/
 
     try
     {
@@ -51,9 +53,10 @@ function main() {
         return;
     }
 
+    $runId = $kernel->generateRunId();
     while(True)
     {
-        $r = $kernel->runCode($code);
+        $r = $kernel->runCode($code, $runId);
         echo $r->getStdout();
         echo $r->getStderr();
 
