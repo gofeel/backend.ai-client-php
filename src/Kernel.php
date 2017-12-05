@@ -9,7 +9,7 @@ class Kernel
     private $auth = null;
     private $kernelId = null;
 
-    public function __construct(string $kernelType, string $kernelId=null, Config $config=null)
+    public function __construct(string $kernelType, string $kernelId=null, Config $config=null, string $token=null)
     {
         $this->kernelType = $kernelType;
         if (!isset($config)) {
@@ -19,19 +19,24 @@ class Kernel
 
         $this->auth = new Auth($config);
 
+        if($token==null) {
+            $token=$this->generateSessionToken();
+        }
+
         if ($kernelId) {
             $this->kernelId = $kernelId;
-            $this->getKernelInfo();
+            //$this->getKernelInfo();
         } else {
-            $this->kernelId = $this->createKernel($this->kernelType);
+            $this->kernelId = $this->createKernel($this->kernelType, $token);
         }
     }
 
-    public function runCode($code)
+    public function runCode($code, $runId)
     {
         $requestBody = array(
             'mode' => "query",
-            'code' => $code
+            'code' => $code,
+            'runId' => $runId
         );
         $res = $this->request('POST', "/{$this->config->apiVersionMajor}/kernel/{$this->kernelId}", $requestBody);
         $result = new RunResult($res);
@@ -62,11 +67,11 @@ class Kernel
         return;
     }
 
-    private function createKernel($kernelType)
+    private function createKernel($kernelType, $token)
     {
         $requestBody = array(
             "lang" => $kernelType,
-            "clientSessionToken" => "sorna-live-code-runner",
+            "clientSessionToken" => $token,
             "resourceLimits" => array(
                 "maxMem" => 0,
                 "timeout" => 0)
@@ -94,9 +99,9 @@ class Kernel
         $requestHeaders = array(
             "Content-Type" => "application/json; charset=utf-8",
             "Content-Length" => strlen($requestBody),
-            'X-Sorna-Version' => $this->config->apiVersion,
-            "X-Sorna-Date" => $now->format(\DateTime::ATOM),
-            "Authorization" => "Sorna signMethod=HMAC-SHA256, credential={$sig}"
+            'x-backendai-version' => $this->config->apiVersion,
+            "date" => $now->format(\DateTime::ATOM),
+            "Authorization" => "BackendAI signMethod=HMAC-SHA256, credential={$sig}"
         );
 
         $requestInfo = array(
@@ -112,5 +117,13 @@ class Kernel
             throw $e;
         }
         return $res->getBody();
+    }
+
+    private function generateSessionToken() {
+        return uniqid();
+    }
+
+    public function generateRunId() {
+        return uniqid();
     }
 }
