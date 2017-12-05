@@ -25,6 +25,6 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $queryString = "v2/kernel/create";
         $now = new \DateTime("2017-10-30", new \DateTimeZone("UTC"));
         $s = $auth->getCredentialString($method, $queryString, $now, $requestBody);
-        $this->assertEquals($s, "TESTESTSERSERESTSET:6b9fbf834e437a78c2c53ad424d3e21cf97d1f2362d2764d26d46386f6617a0e");
+        $this->assertEquals($s, "TESTESTSERSERESTSET:538b0c9b0b47ba77db987af39f98b2590c613dfc47133a135381f321798f97cd");
     }
 }
