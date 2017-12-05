@@ -81,7 +81,6 @@ $('#btn_run').click(function(e) {
   setStatus("KernelCheck");
   var code = "";
   var kernelId = $("#kernelId").val();
-  console.log("EEE");
   if(kernelId == "") {
     setStatus("RequestKernel");
     createKernel();
