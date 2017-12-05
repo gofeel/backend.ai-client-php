@@ -6,6 +6,12 @@ This repository contains the open source PHP SDK that allows you to access the S
 
 ## Installation
 
+The Sorna PHP SDK can be installed with [Composer](https://getcomposer.org/). Run this command:
+
+```sh
+composer require facebook/graph-sdk
+```
+
 ## Usage
 
 
