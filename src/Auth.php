@@ -17,18 +17,18 @@ class Auth
         $this->apiVersion = $config->apiVersion;
     }
 
-    public function getCredentialString($method, $queryString, $date, $bodyValue)
+    public function getCredentialString($method, $queryString, $date, $bodyValue="", $contentType="application/json")
     {
         $signKey = $this->getSignKey($this->secretKey, $date);
-        return $this->accessKey . ":" . $this->sign($signKey, 'binary', $this->getAuthenticationString($method, $queryString, $date->format(\DateTime::ATOM), $bodyValue), 'hex');
+        return $this->accessKey . ":" . $this->sign($signKey, 'binary', $this->getAuthenticationString($method, $queryString, $date->format(\DateTime::ATOM), $bodyValue, $contentType), 'hex');
     }
 
-    public function getAuthenticationString($method, $queryString, $dateValue, $bodyValue)
+    public function getAuthenticationString($method, $queryString, $dateValue, $bodyValue, $contentType)
     {
         $res = hash_init($this->hash_type);
         hash_update($res, $bodyValue);
         $hstring = hash_final($res);
-        return "{$method}\n{$queryString}\n" . $dateValue . "\n" . 'host:' . $this->hostname .  "\n".'content-type:application/json' . "\n" . 'x-backendai-version:'.$this->apiVersion . "\n" . $hstring;
+        return "{$method}\n{$queryString}\n" . $dateValue . "\n" . 'host:' . $this->hostname . "\n" . 'content-type:' . $contentType . "\n" . 'x-backendai-version:'.$this->apiVersion . "\n" . $hstring;
     }
 
     public function getSignKey($secret_key, $now)

@@ -83,7 +83,7 @@ class Kernel
         return $json['kernelId'];
     }
 
-    private function request($method, $queryString, $body="")
+    private function request($method, $queryString, $body="", $contentType="application/json")
     {
         $now = new \DateTime("now", new \DateTimeZone("UTC"));
         $dstring = $now->format(\DateTime::ATOM);
@@ -94,10 +94,10 @@ class Kernel
             $requestBody = json_encode($body);
         }
 
-        $sig = $this->auth->getCredentialString($method, $queryString, $now, $requestBody);
+        $sig = $this->auth->getCredentialString($method, $queryString, $now, $requestBody, $contentType);
 
         $requestHeaders = array(
-            "Content-Type" => "application/json; charset=utf-8",
+            "Content-Type" => "{$contentType}; charset=utf-8",
             "Content-Length" => strlen($requestBody),
             'x-backendai-version' => $this->config->apiVersion,
             "date" => $now->format(\DateTime::ATOM),
