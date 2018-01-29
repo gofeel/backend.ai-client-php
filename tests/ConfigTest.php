@@ -16,6 +16,10 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $args = [
         ];
+
+        unset($_SERVER['BACKEND_ACCESS_KEY']);
+        unset($_SERVER['BACKEND_SECRET_KEY']);
+
         $this->setExpectedException('BackendAI\Exceptions\ConfigException');
         $config = new BackendAI\Config($args);
     }
