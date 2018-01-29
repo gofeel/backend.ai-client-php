@@ -2,7 +2,7 @@
 
 <phpunit bootstrap="tests/bootstrap.php" colors="true">
     <testsuites>
-        <testsuite name="Hello World Test Suite">
+        <testsuite name="Backend AI PHP client library test suite">
             <directory>./tests/</directory>
         </testsuite>
     </testsuites>
