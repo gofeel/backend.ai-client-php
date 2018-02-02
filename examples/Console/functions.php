@@ -3,8 +3,8 @@ require '../../vendor/autoload.php';
 
 use BackendAI\Client;
 use BackendAI\Config;
-
-function set_options()
+use Webmozart\PathUtil\Path;
+function setOptions()
 {
     $cmd = new Commando\Command();
 
@@ -13,8 +13,26 @@ function set_options()
         ->default('php')
         ->describedAs('Kernel type');
 
-    $cmd->option('f')
-        ->aka('file')
-        ->describedAs('File');
+    $cmd->option('d')
+        ->aka('directory')
+        ->describedAs('Base Directory')
+        ->default(getcwd());
     return $cmd;
+}
+
+function getBaseDirectory($path) {
+    $path = Path::makeAbsolute($path, getcwd());
+    if(!is_dir($path)) {
+        return null;
+    }
+    return $path;
+}
+
+function getUnixRelativePath(string $path, string $base) {
+    $ap = Path::makeAbsolute(Path::canonicalize($path), getcwd());
+    if (strncmp($haystack, $needle, strlen($needle)) === 0) {
+        $rp = Path::makeRelative(Path::makeAbsolute(Path::canonicalize($path), getcwd()), $base);
+        return $rp;
+    }
+    return null;
 }

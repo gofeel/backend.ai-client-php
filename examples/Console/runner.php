@@ -19,15 +19,14 @@ function main() {
         )
     );
 
-    $cmd = set_options();
-
-    $path = $cmd['file'];
-    if(!file_exists($path))
-    {
-        echo $c("Input file does not exist.")->error . PHP_EOL;
-        return;
+    $cmd = setOptions();
+    $base = getBaseDirectory($cmd['d']);
+    $files = [];
+    $args = $cmd->getArgumentValues();
+    foreach($args as $arg) {
+        $p = getUnixRelativePath($arg, $base);
+        $files[$p] = $arg;
     }
-    $code = file_get_contents($path);
 
     try
     {
@@ -39,9 +38,7 @@ function main() {
         return;
     }
 
-/*
     echo $c("Backend AI API Version: " . Util::getAPIVersion($config))->internal_info . PHP_EOL;
-*/
 
     try
     {
@@ -52,11 +49,12 @@ function main() {
         echo $c($e->getMessage())->error . PHP_EOL;
         return;
     }
+    $kernel->upload($files);
 
     $runId = $kernel->generateRunId();
     while(True)
     {
-        $r = $kernel->runCode($code, $runId);
+        $r = $kernel->runCode($runId);
         echo $r->getStdout();
         echo $r->getStderr();
 

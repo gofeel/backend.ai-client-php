@@ -7,9 +7,9 @@ class Kernel
 {
     private $config = null;
     private $auth = null;
-    private $kernelId = null;
+    private $sessionToken = null;
 
-    public function __construct(string $kernelType, string $kernelId=null, Config $config=null, string $token=null)
+    public function __construct(string $kernelType, string $sessionToken=null, Config $config=null)
     {
         $this->kernelType = $kernelType;
         if (!isset($config)) {
@@ -19,16 +19,11 @@ class Kernel
 
         $this->auth = new Auth($config);
 
-        if($token==null) {
-            $token=$this->generateSessionToken();
+        if($sessionToken == null) {
+            $sessionToken = $this->generateSessionToken();
         }
 
-        if ($kernelId) {
-            $this->kernelId = $kernelId;
-            //$this->getKernelInfo();
-        } else {
-            $this->kernelId = $this->createKernel($this->kernelType, $token);
-        }
+        $this->sessionToken = $this->createKernelIfNotExists($sessionToken);
     }
 
     public function runCode($code, $runId)
@@ -38,20 +33,20 @@ class Kernel
             'code' => $code,
             'runId' => $runId
         );
-        $res = $this->request('POST', "/{$this->config->apiVersionMajor}/kernel/{$this->kernelId}", $requestBody);
+        $res = $this->request('POST', "/{$this->config->apiVersionMajor}/kernel/{$this->sessionToken}", $requestBody);
         $result = new RunResult($res);
         return $result;
     }
 
     public function destroy()
     {
-        $this->request('DELETE', "/{$this->config->apiVersionMajor}/kernel/{$this->kernelId}", null);
+        $this->request('DELETE', "/{$this->config->apiVersionMajor}/kernel/{$this->sessionToken}", null);
         return;
     }
 
     public function refresh()
     {
-        $this->request('PATCH', "/{$this->config->apiVersionMajor}/kernel/{$this->kernelId}", null);
+        $this->request('PATCH', "/{$this->config->apiVersionMajor}/kernel/{$this->sessionToken}", null);
         return true;
     }
 
@@ -62,15 +57,15 @@ class Kernel
 
     private function getKernelInfo()
     {
-        $res = $this->request('GET', "/{$this->config->apiVersionMajor}/kernel/{$this->kernelId}", null);
+        $res = $this->request('GET', "/{$this->config->apiVersionMajor}/kernel/{$this->sessionToken}", null);
         $this->kernelType = $res['lang'];
         return;
     }
 
-    private function createKernel($kernelType, $token)
+    private function createKernelIfNotExists($token)
     {
         $requestBody = array(
-            "lang" => $kernelType,
+            "lang" => $this->kernelType,
             "clientSessionToken" => $token,
             "resourceLimits" => array(
                 "maxMem" => 0,
@@ -83,36 +78,66 @@ class Kernel
         return $json['kernelId'];
     }
 
-    private function request($method, $queryString, $body="", $contentType="application/json")
+    public function upload($files)
     {
+        $res = $this->request('POST', "/{$this->config->apiVersionMajor}/kernel/{$this->sessionToken}/upload", "", $files);
+        try {
+            $res = $this->request('POST', "/{$this->config->apiVersionMajor}/kernel/{$this->sessionToken}/upload", "", $files);
+        } catch (GuzzleHttp\Exception\ServerException $e) {
+            $responseBody = $e->getResponse()->getBody(true);
+            echo $responseBody;
+        }
+    }
+
+    private function request($method, $queryString, $body="", $files=[])
+    {
+        $url = $this->config->endpoint . $queryString;
         $now = new \DateTime("now", new \DateTimeZone("UTC"));
         $dstring = $now->format(\DateTime::ATOM);
 
-        if ($body === null) {
-            $requestBody = '';
-        } else {
-            $requestBody = json_encode($body);
-        }
-
-        $sig = $this->auth->getCredentialString($method, $queryString, $now, $requestBody, $contentType);
-
+        $requestInfo = array(
+            "cache" => 'default',
+        );
         $requestHeaders = array(
-            "Content-Type" => "{$contentType}; charset=utf-8",
-            "Content-Length" => strlen($requestBody),
             'x-backendai-version' => $this->config->apiVersion,
             "date" => $now->format(\DateTime::ATOM),
-            "Authorization" => "BackendAI signMethod=HMAC-SHA256, credential={$sig}"
         );
+        if(is_array($files) && count($files) > 0) {
+            $authBaseString = '';
+            $contentType = "multipart/form-data";
+            $multipart = [];
+            foreach($files as $k => $v) {
+                $multipart[] = [
+                    'name' => 'src',
+                    'filename' => $k,
+                    'contents' => fopen($v, 'r')
+                ];
+            }
+            $requestInfo['multipart'] = $multipart;
+        } else if(is_array($body)){
+            $authBaseString = '';
+            $authBaseString = json_encode($body);
+            $contentType = "application/json";
+            $requestInfo['json'] = $body;
+        } else {
+            if ($body === null) {
+                $authBaseString = '';
+            } else {
+                $authBaseString = $body;
+            }
+            $contentType = "application/json";
+            $requestInfo['json'] = json_decode($authBaseString);
+            $requestHeaders["Content-Type"] = $contentType;
+        }
 
-        $requestInfo = array(
-            "headers" => $requestHeaders,
-            "cache" => 'default',
-            "body" => $requestBody
-        );
+        $sig = $this->auth->getCredentialString($method, $queryString, $now, $authBaseString, $contentType);
+        $requestHeaders["Authorization"] = "BackendAI signMethod=HMAC-SHA256, credential={$sig}";
+
+        $requestInfo['headers'] = $requestHeaders;
 
         $client = new GuzzleHttp\Client();
         try {
-            $res = $client->request($method, $this->config->endpoint . $queryString, $requestInfo);
+            $res = $client->request($method, $url, $requestInfo);
         } catch (GuzzleHttp\Exception\ClientException $e) {
             throw $e;
         }
