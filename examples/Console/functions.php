@@ -17,6 +17,14 @@ function setOptions()
         ->aka('directory')
         ->describedAs('Base Directory')
         ->default(getcwd());
+    $cmd->option('b')
+        ->aka('buildcmd')
+        ->describedAs('Command for build')
+        ->default("*");
+    $cmd->option('e')
+        ->aka('execcmd')
+        ->describedAs('Command for execution')
+        ->default("*");
     return $cmd;
 }
 

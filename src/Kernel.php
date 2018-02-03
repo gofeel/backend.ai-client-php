@@ -26,13 +26,16 @@ class Kernel
         $this->sessionToken = $this->createKernelIfNotExists($sessionToken);
     }
 
-    public function runCode($code, $runId)
+    public function execute($mode, $runId, $code="", $options=null)
     {
         $requestBody = array(
-            'mode' => "query",
+            'mode' => $mode,
             'code' => $code,
             'runId' => $runId
         );
+        if(!is_null($options)) {
+            $requestBody['options'] = $options;
+        }
         $res = $this->request('POST', "/{$this->config->apiVersionMajor}/kernel/{$this->sessionToken}", $requestBody);
         $result = new RunResult($res);
         return $result;

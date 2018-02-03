@@ -65,8 +65,7 @@ class RunResult
 
     public function isFinished()
     {
-        $this->parseData();
-        return (!$this->continuation);
+        return ($this->getStatus() == "finished");
     }
 
     public function getStatus()

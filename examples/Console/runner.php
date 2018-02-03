@@ -52,11 +52,14 @@ function main() {
     $kernel->upload($files);
 
     $runId = $kernel->generateRunId();
+
+    $opts = array("build" => $cmd['b'], "exec" => $cmd['e']);
     while(True)
     {
-        $r = $kernel->runCode($runId);
+        $r = $kernel->execute("batch", $runId, "", $opts);
+        //echo $r->asJsonString();
         echo $r->getStdout();
-        echo $r->getStderr();
+        echo $c($r->getStderr())->error;
 
         if($r->isFinished())
         {
@@ -68,6 +71,7 @@ function main() {
             $code = readline("");
         } else {
             $code = "";
+            $mode = "continue";
         }
     }
     $kernel->destroy();
